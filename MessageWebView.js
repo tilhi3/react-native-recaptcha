@@ -1,5 +1,15 @@
 import React from 'react'
-import { WebView, View } from 'react-native'
+import { View } from 'react-native'
+import { WebView } from 'react-native-webview'
+
+https://github.com/facebook/react-native/issues/10865#issuecomment-536757883
+// Apply fix for newer react-native-webview not supporting window.postMessage
+const webViewFix = function() {
+  window.postMessage = function(data) {
+    window.ReactNativeWebView.postMessage(data);
+  };
+};
+const windowPostMessageFix = '(' + String(webViewFix) + ')();';
 
 // fix https://github.com/facebook/react-native/issues/10865
 const patchPostMessageJsCode = `(${String(function() {
@@ -12,6 +22,7 @@ const patchPostMessageJsCode = `(${String(function() {
     }
     window.postMessage = patchedPostMessage
 })})();`
+
 
 export default class MessageWebView extends React.Component {
     constructor(props) {
@@ -36,7 +47,10 @@ export default class MessageWebView extends React.Component {
                 style={props.containerStyle}
                 javaScriptEnabled
                 automaticallyAdjustContentInsets
-                injectedJavaScript={patchPostMessageJsCode}
+                injectedJavaScript={[
+                    windowPostMessageFix,
+                    patchPostMessageJsCode
+                ].join('')}
                 source={source ? source : html ? { html } : url}
                 ref={x => {this.webview = x}}
                 onMessage={e => onMessage(e.nativeEvent.data)}
