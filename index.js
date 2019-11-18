@@ -68,7 +68,8 @@ export default class ReCaptcha extends Component {
             height: '100%',
             zIndex: -1,
             position: 'relative',
-            marginBottom: 20
+            marginBottom: 30,
+            backgroundColor: 'transparent',
         },
         reCaptchaType: type.invisible
     };

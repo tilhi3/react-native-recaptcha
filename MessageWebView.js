@@ -2,7 +2,7 @@ import React from 'react'
 import { View } from 'react-native'
 import { WebView } from 'react-native-webview'
 
-https://github.com/facebook/react-native/issues/10865#issuecomment-536757883
+//https://github.com/facebook/react-native/issues/10865#issuecomment-536757883
 // Apply fix for newer react-native-webview not supporting window.postMessage
 const webViewFix = function() {
   window.postMessage = function(data) {
@@ -27,7 +27,12 @@ const patchPostMessageJsCode = `(${String(function() {
 export default class MessageWebView extends React.Component {
     constructor(props) {
         super(props)
-        this.postMessage = this.postMessage.bind(this)
+        this.postMessage = this.postMessage.bind(this);
+        this.reloadCaptcha = this.reloadCaptcha.bind(this);
+
+        this.state = {
+            reloadCount: 0,
+        }
     }
     postMessage(action) {
         this.WebView.postMessage(JSON.stringify(action))
@@ -37,6 +42,11 @@ export default class MessageWebView extends React.Component {
         return this.webview;
     }
 
+    reloadCaptcha() {
+        console.log('update key..'+this.state.reloadCount);
+        this.setState({reloadCount: this.state.reloadCount + 1});
+    }
+
     render() {
         const { html, source, url, onMessage, ...props } = this.props
 
@@ -44,6 +54,7 @@ export default class MessageWebView extends React.Component {
             <View style={props.containerStyle}>
             <WebView
                 {...props}
+                key={`try-${this.state.reloadCount}`}
                 style={props.containerStyle}
                 javaScriptEnabled
                 automaticallyAdjustContentInsets
